@@ -11,7 +11,6 @@ public class MenuUiHandler : MonoBehaviour
 {
     public TMP_InputField playerNameInput;
 
-    // Start is called before the first frame update
 
     /// <summary>
     /// Loads the scene with index 1, which represents the main game scene.
