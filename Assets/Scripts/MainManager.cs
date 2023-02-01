@@ -10,18 +10,18 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
-    public GameObject GameOverText;
+    public Text scoreText;
+    public Text topScoreText;
+    public GameObject gameOver;
     
-    private bool m_Started = false;
-    private int m_Points;
-    
-    private bool m_GameOver = false;
-
-    
+    private bool _isGameStarted = false;
+    private int _gamePoints;
+           
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
+        GameManager.Instance.GetCurrentPlayer().ScoreReset();
+        
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,15 +36,24 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        Player topPlayer = GameManager.Instance.GetTopPlayer();
+        int topScoreCheck = topPlayer.Score;
+        Player currentPlayer = GameManager.Instance.GetCurrentPlayer();
+        if (topScoreCheck == 0)
+        {
+            topPlayer = currentPlayer;
+        }
+        topScoreText.text = "Top Score: " + topPlayer.Name + " - " + topPlayer.Score;
     }
 
     private void Update()
     {
-        if (!m_Started)
+        if (!_isGameStarted)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                m_Started = true;
+                GameManager.SetGameOver(false);
+                _isGameStarted = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
@@ -53,8 +62,9 @@ public class MainManager : MonoBehaviour
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
             }
         }
-        else if (m_GameOver)
+        else if (GameManager.Instance.isGameOver)
         {
+            gameOver.SetActive(true);
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -62,15 +72,11 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    void AddPoint(int point)
+    private void AddPoint(int point)
     {
-        m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        _gamePoints += point;
+        scoreText.text = $"Score : {_gamePoints}";
+        GameManager.Instance.GetCurrentPlayer().AddPoints(point);
     }
 
-    public void GameOver()
-    {
-        m_GameOver = true;
-        GameOverText.SetActive(true);
-    }
 }
