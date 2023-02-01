@@ -10,7 +10,7 @@ using TMPro;
 public class MenuUiHandler : MonoBehaviour
 {
     public TMP_InputField playerNameInput;
-    [SerializeField] private Player player;
+
     // Start is called before the first frame update
 
     /// <summary>
@@ -26,23 +26,9 @@ public class MenuUiHandler : MonoBehaviour
         }
         else
         {
-            // If the player name is not empty, load the main game scene
-            GameObject playerGO = new GameObject("Player");
-            player = playerGO.AddComponent<Player>();
-            player.Name = playerNameInput.text;
-            player.Score = 0;
-            GameManager.Instance.SetCurrentPlayer(player);
-            GameManager.SetGameOver(false);
+            GameManager.Instance.ReadStringInput(playerNameInput.text);
             SceneManager.LoadScene(1);
         }
-    }
-
-        /// <summary>
-        /// Loads the menu scene which is index 0
-        /// </summary>
-        public void BackToMenu()
-    {
-        SceneManager.LoadScene(0);
     }
 
     /// <summary>

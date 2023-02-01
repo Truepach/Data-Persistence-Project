@@ -377,7 +377,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerNameInput: {fileID: 1194578935}
-  player: {fileID: 0}
 --- !u!1 &527836794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1541,6 +1540,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topScoreText: {fileID: 1177485712}
+  userName: 
+  topScoreName: Nobody
+  currentScore: 0
+  topScore: 0
   isGameOver: 0
 --- !u!4 &1399403848
 Transform:

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -14,14 +15,15 @@ public class MainManager : MonoBehaviour
     public Text topScoreText;
     public GameObject gameOver;
     
-    private bool _isGameStarted = false;
-    private int _gamePoints;
+    private bool m_Started = false;
+    private int m_points;
+
+    private bool m_GameOver = false;
            
     // Start is called before the first frame update
     private void Start()
     {
-        GameManager.Instance.GetCurrentPlayer().ScoreReset();
-        
+         
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,24 +38,18 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
-        Player topPlayer = GameManager.Instance.GetTopPlayer();
-        int topScoreCheck = topPlayer.Score;
-        Player currentPlayer = GameManager.Instance.GetCurrentPlayer();
-        if (topScoreCheck == 0)
-        {
-            topPlayer = currentPlayer;
-        }
-        topScoreText.text = "Top Score: " + topPlayer.Name + " - " + topPlayer.Score;
+        topScoreText.text = $"Top Score: {GameManager.Instance.topScoreName} {GameManager.Instance.topScore}";
+        Debug.Log("Current Name: " + GameManager.Instance.userName);
     }
 
     private void Update()
     {
-        if (!_isGameStarted)
+        if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                GameManager.SetGameOver(false);
-                _isGameStarted = true;
+               // GameManager.SetGameOver(false);
+                m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
@@ -62,21 +58,46 @@ public class MainManager : MonoBehaviour
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
             }
         }
-        else if (GameManager.Instance.isGameOver)
+        else if (m_GameOver)
         {
             gameOver.SetActive(true);
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if(Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
     private void AddPoint(int point)
     {
-        _gamePoints += point;
-        scoreText.text = $"Score : {_gamePoints}";
-        GameManager.Instance.GetCurrentPlayer().AddPoints(point);
+        m_points += point;
+        scoreText.text = $"Score : {m_points}";
     }
 
+    public void GameOver()
+    {
+        m_GameOver = true;
+        gameOver.SetActive(true);
+        if(m_points > GameManager.Instance.topScore) 
+        {
+            GameManager.Instance.topScore = m_points;
+            if (!string.IsNullOrEmpty(GameManager.Instance.userName))
+            {
+                string currentUser = GameManager.Instance.userName;
+                GameManager.Instance.topScoreName = currentUser;
+            }
+            else
+            {
+                GameManager.Instance.topScoreName = "Unknown Player";
+            }
+            topScoreText.text = $"Top Score: {GameManager.Instance.topScoreName} {GameManager.Instance.topScore}";
+            GameManager.Instance.SaveTopScore();
+
+
+        } 
+    }
 }

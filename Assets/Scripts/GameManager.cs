@@ -5,34 +5,36 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    public TMP_Text topScoreText;
+    public TextMeshProUGUI topScoreText;
 
-    // A boolean variable to track the status of the game
+    public string userName;
+    public string topScoreName;
+
+    public int currentScore;
+    public int topScore;
 
     public bool isGameOver;
-    private Player _topPlayer;
-    private Player _currentPlayer;
     
 
     //Start() and Update() methods not used in this code
 
     private void Awake()
     {
-        if(Instance !=null)
+        LoadTopScore();
+        topScoreText.text = "Top Score: " + topScoreName + " - " + topScore;
+        if (Instance !=null)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this;
-        _topPlayer = LoadHighScore();
-        
+        Instance = this;        
         DontDestroyOnLoad(gameObject);
-
     }
 
     /// <summary>
@@ -46,88 +48,65 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the current player to the given player object.
+    /// Sets the value of `userName` to the input string `s`.
     /// </summary>
-    /// <param name="player">The player object to set as the current player.</param>
-    public void SetCurrentPlayer(Player player)
+    /// <param name="s">The input string to be assigned to `userName`.</param>
+    public void ReadStringInput(string s)
     {
-        _currentPlayer = player;
+        userName = s;
     }
 
-    /// <summary>
-    /// Returns the current player.
-    /// </summary>
-    /// <returns>The current player.</returns>
-    public Player GetCurrentPlayer()
-    {
-        return _currentPlayer;
-    }
+    
 
     /// <summary>
-    /// Returns the Top scoring player.
-    /// </summary>
-    /// <returns>The Top scoring player.</returns>
-    public Player GetTopPlayer()
-    {
-        return _topPlayer;  
-    }
-
-    /// <summary>
-    /// Sets the Top scoring player to the given player object.
-    /// </summary>
-    /// <param name="player">The player to set as the Top player.</param>
-    private void SetTopPlayer(Player player)
-    {
-        _topPlayer = player;
-        topScoreText.text = "Top Score: " + _topPlayer.Name + _topPlayer.Score;
-    }
-
-    /// <summary>
-    /// Saves the Top Scoriing Player to a Json string and file 
+    /// Saves the Top Scoring Player to a Json string and file 
     /// </summary>
     
-    public void SaveHighScore()
+    public void SaveTopScore()
     {
-        // Convert the Player object to a JSON string
-        string json = JsonUtility.ToJson(_topPlayer);
+        SaveData saveData = new SaveData();
+        saveData.topScoreName = topScoreName;
+        saveData.topScore = topScore;
+       
+        string json = JsonUtility.ToJson(saveData);
 
-        // Save the JSON string to the player prefs
+        
         File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
     }
 
     /// <summary>
     /// Loads the saved high score from a json file
     /// </summary>
-    public Player LoadHighScore()
+    public void LoadTopScore()
     {
         // Load the JSON string from the player prefs
         string path = Application.persistentDataPath + "/savefile.json";
-        if(File.Exists(path))
+        if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
-            SetTopPlayer(JsonUtility.FromJson<Player>(json));
+            SaveData saveData = JsonUtility.FromJson<SaveData>(json);
 
-            return _topPlayer;
-        }
+            topScoreName = saveData.topScoreName;
+            topScore = saveData.topScore;
+            
 
-        else
-        {
-            return null;
         }
-       
     }
 
-    public void CompareScore(Player player)
+    /// <summary>
+    /// Class to hold data for saving high scores.
+    /// </summary>
+
+    [Serializable] public class SaveData
     {
-       int topScore = _topPlayer.Score;
-       int curScore = player.Score;
-       if(curScore > topScore) 
-        {
-            SetTopPlayer(player);
-        }
-       else if(topScore == 0)
-        {
-            SetTopPlayer(player);
-        }
+        /// <summary>
+        /// The name of the player who achieved the top score.
+        /// </summary>
+        public string topScoreName;
+        /// <summary>
+        /// The highest score achieved.
+        /// </summary>
+        public int topScore;
     }
+
 }
